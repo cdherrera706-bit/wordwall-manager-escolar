@@ -256,8 +256,9 @@ st.info(
 )
 
 mes = st.text_input(
-    "Mes del reporte",
-    value="Octubre 2026"
+    "Título del reporte",
+    value="Reporte de Wordwall",
+    placeholder="Escribe el título de tu reporte"
 )
 
 archivos = st.file_uploader(
