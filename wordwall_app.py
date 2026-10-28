@@ -206,42 +206,77 @@ def generar_excel(tablas):
 
             hoja = escritor.sheets[nombre_hoja]
             hoja.freeze_panes = "B2"
-               # Resaltar la columna de promedio mensual
-            columna_promedio = hoja.max_column
+            hoja.auto_filter.ref = hoja.dimensions
 
-            for fila in range(2, hoja.max_row + 1):
-                celda = hoja.cell(
-                    row=fila,
-                    column=columna_promedio
-                )
+            # Colores del reporte
+            azul_encabezado = "174A69"
+            azul_fila = "EAF1F5"
+            blanco = "FFFFFF"
+            texto = "263747"
 
-                celda.fill = PatternFill(
-                    fill_type="solid",
-                    fgColor="DDF2E1"
-                )
-
-                celda.font = Font(
-                    bold=True,
-                    color="245B37"
-                )
-
-                celda.alignment = Alignment(
-                    horizontal="center"
-                )
-
+            # Formato de encabezados
             for celda in hoja[1]:
                 celda.font = Font(
                     bold=True,
-                    color="FFFFFF"
+                    color=blanco
                 )
                 celda.fill = PatternFill(
-                    "solid",
-                    fgColor="174A69"
+                    fill_type="solid",
+                    fgColor=azul_encabezado
                 )
                 celda.alignment = Alignment(
+                    horizontal="center",
+                    vertical="center",
                     wrap_text=True
                 )
 
+            # La última columna es el promedio mensual
+            columna_promedio = hoja.max_column
+
+            # Formato de filas y calificaciones
+            for fila in range(2, hoja.max_row + 1):
+                sombrear = fila % 2 == 1
+
+                for columna in range(1, hoja.max_column + 1):
+                    celda = hoja.cell(
+                        row=fila,
+                        column=columna
+                    )
+
+                    es_promedio = columna == columna_promedio
+
+                    # Promedio siempre blanco
+                    if es_promedio:
+                        color_fondo = blanco
+                    elif sombrear:
+                        color_fondo = azul_fila
+                    else:
+                        color_fondo = blanco
+
+                    celda.fill = PatternFill(
+                        fill_type="solid",
+                        fgColor=color_fondo
+                    )
+
+                    celda.font = Font(
+                        bold=es_promedio,
+                        color=texto
+                    )
+
+                    # Nombres a la izquierda,
+                    # calificaciones centradas
+                    celda.alignment = Alignment(
+                        horizontal=(
+                            "left" if columna == 1 else "center"
+                        ),
+                        vertical="center"
+                    )
+
+                    # Mostrar calificaciones con 2 decimales
+                    if columna > 1:
+                        celda.number_format = "0.00"
+
+            # Ajustar ancho de columnas
             for columna in hoja.columns:
                 ancho = min(
                     55,
@@ -259,6 +294,9 @@ def generar_excel(tablas):
                 )
 
                 hoja.column_dimensions[letra].width = ancho
+
+            # Ajustar altura de encabezados
+            hoja.row_dimensions[1].height = 35
 
     return salida.getvalue()
 
