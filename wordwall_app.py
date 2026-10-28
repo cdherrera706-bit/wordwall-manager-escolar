@@ -174,24 +174,11 @@ def crear_tablas(registros, actividades):
 
         tabla[actividades] = tabla[actividades].fillna(0)
 
-# Calcular el promedio considerando
-        # las actividades no realizadas como cero
-        tabla["Promedio mensual"] = (
-            tabla[actividades].mean(axis=1).round(2)
-        )
+tabla["Promedio mensual"] = (
+    tabla[actividades].mean(axis=1).round(2)
+)
 
-        # Mostrar un guion en las actividades
-        # que el alumno no realizó
-        for actividad in actividades:
-            sin_calificacion = ~tabla.index.isin(
-                parte.loc[
-                    parte["Actividad"] == actividad,
-                    "Clave"
-                ]
-            )
-
-            tabla[actividad] = tabla[actividad].round(2)
-            tabla.loc[sin_calificacion, actividad] = "-"
+tabla[actividades] = tabla[actividades].round(2)
 
         resultado[grupo] = (
             tabla.reset_index(drop=True)
