@@ -95,9 +95,7 @@ def leer_archivo(archivo):
     datos = archivo.getvalue()
 
     if archivo.name.lower().endswith(".csv"):
-        for codificacion in (
-            "utf-8-sig", "cp1252", "latin-1"
-        ):
+        for codificacion in ("utf-8-sig", "cp1252", "latin-1"):
             try:
                 tabla = pd.read_csv(
                     io.BytesIO(datos),
@@ -107,15 +105,11 @@ def leer_archivo(archivo):
                     engine="python",
                     encoding=codificacion
                 )
-                return extraer_intentos(
-                    tabla, archivo.name
-                )
+                return extraer_intentos(tabla, archivo.name)
             except UnicodeError:
                 continue
 
-        raise ValueError(
-            "No se pudo leer el archivo CSV"
-        )
+        raise ValueError("No se pudo leer el archivo CSV")
 
     tabla = pd.read_excel(
         io.BytesIO(datos),
