@@ -174,11 +174,11 @@ def crear_tablas(registros, actividades):
 
         tabla[actividades] = tabla[actividades].fillna(0)
 
-tabla["Promedio mensual"] = (
-    tabla[actividades].mean(axis=1).round(2)
-)
+        tabla["Promedio mensual"] = (
+            tabla[actividades].mean(axis=1).round(2)
+        )
 
-tabla[actividades] = tabla[actividades].round(2)
+        tabla[actividades] = tabla[actividades].round(2)
 
         resultado[grupo] = (
             tabla.reset_index(drop=True)
