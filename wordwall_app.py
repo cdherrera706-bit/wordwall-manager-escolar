@@ -256,8 +256,8 @@ st.info(
 )
 
 mes = st.text_input(
-    "Título del reporte",
-    value="Reporte de Wordwall",
+    "Escribe el título del reporte",
+    value=" ",
     placeholder="Escribe el título de tu reporte"
 )
 
