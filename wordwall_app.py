@@ -252,7 +252,7 @@ st.write(
 st.info(
     "Sigue las instrucciones. La aplicación se encargará de "
     "clasificar las calificaciones y generar un reporte "
-    "por grupo y alumno... ¡Listo para descargar!"
+    "por alumno y grupo... ¡Listo para descargar!"
 )
 
 mes = st.text_input(
