@@ -8,6 +8,7 @@ import streamlit as st
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
+
 st.set_page_config(
     page_title="Wordwall Results Manager",
     page_icon="📚",
@@ -17,40 +18,40 @@ st.set_page_config(
 PATRON = re.compile(r"^\s*(\d+[A-Za-z]?)\s+(.+?)\s*$")
 
 CORRECTAS = {
-    "✔", "✓", "true", "correct",
-    "correcto", "1", "yes", "si", "sí"
+    "✔", "✓", "true", "correct", "correcto",
+    "1", "yes", "si", "sí"
 }
 
 INCORRECTAS = {
-    "✖", "✘", "✗", "✕", "❌",
-    "false", "incorrect", "incorrecto", "0", "no"
+    "✖", "✘", "✗", "✕", "❌", "false",
+    "incorrect", "incorrecto", "0", "no"
 }
 
 
 def normalizar(texto):
     texto = unicodedata.normalize("NFKD", str(texto))
-    return " ".join(
-        "".join(
-            c for c in texto
-            if not unicodedata.combining(c)
-        ).casefold().split()
+    caracteres = "".join(
+        c for c in texto
+        if not unicodedata.combining(c)
     )
+    return " ".join(caracteres.casefold().split())
 
 
 def extraer_intentos(tabla, archivo):
     filas = tabla.fillna("").astype(str).values.tolist()
 
     actividad = next(
-        (f[0].strip() for f in filas if f and f[0].strip()),
+        (fila[0].strip() for fila in filas if fila and fila[0].strip()),
         Path(archivo).stem
     )
 
     intentos = []
     alumno_actual = None
-    aciertos = preguntas = 0
+    aciertos = 0
+    preguntas = 0
 
     def guardar():
-        if alumno_actual is not None and preguntas:
+        if alumno_actual is not None and preguntas > 0:
             grupo, alumno = alumno_actual
             intentos.append({
                 "Grupo": grupo,
@@ -64,10 +65,7 @@ def extraer_intentos(tabla, archivo):
         b = fila[1].strip() if len(fila) > 1 else ""
         c = fila[2].strip() if len(fila) > 2 else ""
 
-        coincidencia = (
-            PATRON.fullmatch(a)
-            if not b and not c else None
-        )
+        coincidencia = PATRON.fullmatch(a) if not b and not c else None
 
         if coincidencia:
             guardar()
@@ -75,7 +73,8 @@ def extraer_intentos(tabla, archivo):
                 coincidencia.group(1),
                 coincidencia.group(2).strip()
             )
-            aciertos = preguntas = 0
+            aciertos = 0
+            preguntas = 0
             continue
 
         if alumno_actual is None:
@@ -85,7 +84,8 @@ def extraer_intentos(tabla, archivo):
 
         if marca in CORRECTAS or marca in INCORRECTAS:
             preguntas += 1
-            aciertos += int(marca in CORRECTAS)
+            if marca in CORRECTAS:
+                aciertos += 1
 
     guardar()
     return actividad, intentos
@@ -119,7 +119,7 @@ def leer_archivo(archivo):
         engine="openpyxl"
     )
 
-      return extraer_intentos(tabla, archivo.name)
+    return extraer_intentos(tabla, archivo.name)
 
 
 def crear_tablas(registros, actividades):
@@ -174,11 +174,11 @@ def crear_tablas(registros, actividades):
 
         tabla[actividades] = tabla[actividades].fillna(0)
 
-        tabla[actividades] = tabla[actividades].round(2)
-
         tabla["Promedio mensual"] = (
             tabla[actividades].mean(axis=1).round(2)
         )
+
+        tabla[actividades] = tabla[actividades].round(2)
 
         resultado[grupo] = (
             tabla.reset_index(drop=True)
@@ -189,14 +189,12 @@ def crear_tablas(registros, actividades):
         )
 
     return resultado
+
+
 def generar_excel(tablas):
     salida = io.BytesIO()
 
-    with pd.ExcelWriter(
-        salida,
-        engine="openpyxl"
-    ) as escritor:
-
+    with pd.ExcelWriter(salida, engine="openpyxl") as escritor:
         for grupo, tabla in tablas.items():
             nombre_hoja = ("Grupo " + str(grupo))[:31]
 
@@ -207,7 +205,6 @@ def generar_excel(tablas):
             )
 
             hoja = escritor.sheets[nombre_hoja]
-
             hoja.freeze_panes = "B2"
             hoja.auto_filter.ref = hoja.dimensions
 
@@ -216,12 +213,10 @@ def generar_excel(tablas):
                     bold=True,
                     color="FFFFFF"
                 )
-
                 celda.fill = PatternFill(
                     "solid",
                     fgColor="174A69"
                 )
-
                 celda.alignment = Alignment(
                     wrap_text=True
                 )
@@ -238,14 +233,16 @@ def generar_excel(tablas):
                     )
                 )
 
-                hoja.column_dimensions[
-                    get_column_letter(
-                        columna[0].column
-                    )
-                ].width = ancho
+                letra = get_column_letter(
+                    columna[0].column
+                )
+
+                hoja.column_dimensions[letra].width = ancho
 
     return salida.getvalue()
-  st.title("📚 Wordwall Results Manager")
+
+
+st.title("📚 Wordwall Results Manager")
 
 st.write(
     "Unifica las calificaciones de Wordwall "
@@ -270,9 +267,8 @@ archivos = st.file_uploader(
 )
 
 st.caption(
-    "El orden de los intentos será el orden de "
-    "aparición en el archivo. "
-    "No subas el mismo archivo dos veces."
+    "El orden de los intentos será el orden de aparición "
+    "en el archivo. No subas el mismo archivo dos veces."
 )
 
 if archivos:
@@ -285,8 +281,7 @@ if archivos:
 
             if not intentos:
                 st.warning(
-                    f"No se encontraron resultados en "
-                    f"{archivo.name}"
+                    f"No se encontraron resultados en {archivo.name}"
                 )
                 continue
 
