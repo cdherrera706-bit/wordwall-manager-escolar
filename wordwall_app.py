@@ -250,9 +250,9 @@ st.write(
 )
 
 st.info(
-    "Cada actividad es una columna. "
-    "Se promedian hasta los tres primeros intentos "
-    "y las actividades pendientes valen cero."
+    "Si un alumno hace una actividad varias veces, "
+    "se promedian hasta los tres primeros intentos. "
+    "Las actividades no realizadas valen cero."
 )
 
 mes = st.text_input(
