@@ -206,7 +206,28 @@ def generar_excel(tablas):
 
             hoja = escritor.sheets[nombre_hoja]
             hoja.freeze_panes = "B2"
-            hoja.auto_filter.ref = hoja.dimensions
+               # Resaltar la columna de promedio mensual
+            columna_promedio = hoja.max_column
+
+            for fila in range(2, hoja.max_row + 1):
+                celda = hoja.cell(
+                    row=fila,
+                    column=columna_promedio
+                )
+
+                celda.fill = PatternFill(
+                    fill_type="solid",
+                    fgColor="DDF2E1"
+                )
+
+                celda.font = Font(
+                    bold=True,
+                    color="245B37"
+                )
+
+                celda.alignment = Alignment(
+                    horizontal="center"
+                )
 
             for celda in hoja[1]:
                 celda.font = Font(
