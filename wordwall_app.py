@@ -120,14 +120,16 @@ def leer_archivo(archivo):
     )
 
       return extraer_intentos(tabla, archivo.name)
-  def crear_tablas(registros, actividades):
-      datos = pd.DataFrame(registros)
-      
-      datos["Clave"] = datos["Alumno"].map(normalizar)
-      
-      datos["Intento"] = datos.groupby(
-      ["Grupo", "Clave", "Actividad"],
-      sort=False
+
+
+def crear_tablas(registros, actividades):
+    datos = pd.DataFrame(registros)
+
+    datos["Clave"] = datos["Alumno"].map(normalizar)
+
+    datos["Intento"] = datos.groupby(
+        ["Grupo", "Clave", "Actividad"],
+        sort=False
     ).cumcount() + 1
 
     primeros = datos[datos["Intento"] <= 3]
