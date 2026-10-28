@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 
 
@@ -211,29 +211,43 @@ def generar_excel(tablas):
             # Colores del reporte
             azul_encabezado = "174A69"
             azul_fila = "EAF1F5"
+            azul_promedio = "CFDDE6"
             blanco = "FFFFFF"
             texto = "263747"
+            gris_borde = "D1D9DF"
 
-            # Formato de encabezados
+            # Bordes delgados gris claro
+            borde_celda = Border(
+                left=Side(style="thin", color=gris_borde),
+                right=Side(style="thin", color=gris_borde),
+                top=Side(style="thin", color=gris_borde),
+                bottom=Side(style="thin", color=gris_borde)
+            )
+
+            # Encabezados
             for celda in hoja[1]:
                 celda.font = Font(
                     bold=True,
                     color=blanco
                 )
+
                 celda.fill = PatternFill(
                     fill_type="solid",
                     fgColor=azul_encabezado
                 )
+
                 celda.alignment = Alignment(
                     horizontal="center",
                     vertical="center",
                     wrap_text=True
                 )
 
-            # La última columna es el promedio mensual
+                celda.border = borde_celda
+
+            # Última columna: promedio mensual
             columna_promedio = hoja.max_column
 
-            # Formato de filas y calificaciones
+            # Formato de filas
             for fila in range(2, hoja.max_row + 1):
                 sombrear = fila % 2 == 1
 
@@ -245,11 +259,12 @@ def generar_excel(tablas):
 
                     es_promedio = columna == columna_promedio
 
-                    # Promedio siempre blanco
-                    if es_promedio:
-                        color_fondo = blanco
-                    elif sombrear:
-                        color_fondo = azul_fila
+                    # Sombreado alternado
+                    if sombrear:
+                        if es_promedio:
+                            color_fondo = azul_promedio
+                        else:
+                            color_fondo = azul_fila
                     else:
                         color_fondo = blanco
 
@@ -258,13 +273,13 @@ def generar_excel(tablas):
                         fgColor=color_fondo
                     )
 
+                    # Promedios en negritas
                     celda.font = Font(
                         bold=es_promedio,
                         color=texto
                     )
 
-                    # Nombres a la izquierda,
-                    # calificaciones centradas
+                    # Alineación
                     celda.alignment = Alignment(
                         horizontal=(
                             "left" if columna == 1 else "center"
@@ -272,11 +287,14 @@ def generar_excel(tablas):
                         vertical="center"
                     )
 
-                    # Mostrar calificaciones con 2 decimales
+                    # Bordes grises
+                    celda.border = borde_celda
+
+                    # Calificaciones con dos decimales
                     if columna > 1:
                         celda.number_format = "0.00"
 
-            # Ajustar ancho de columnas
+            # Ancho automático de columnas
             for columna in hoja.columns:
                 ancho = min(
                     55,
@@ -295,11 +313,10 @@ def generar_excel(tablas):
 
                 hoja.column_dimensions[letra].width = ancho
 
-            # Ajustar altura de encabezados
+            # Altura de encabezados
             hoja.row_dimensions[1].height = 35
 
     return salida.getvalue()
-
 
 st.title("📚 Wordwall Results Manager")
 
