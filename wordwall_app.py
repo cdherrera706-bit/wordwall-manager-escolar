@@ -245,14 +245,14 @@ def generar_excel(tablas):
 st.title("📚 Wordwall Results Manager")
 
 st.write(
-    "Unifica las calificaciones de Wordwall "
-    "por grupo y actividad."
+    "Organiza los resultados de tus alumnos de forma "
+    "rápida y sencilla."
 )
 
 st.info(
-    "Si un alumno hace una actividad varias veces, "
-    "se promedian hasta los tres primeros intentos. "
-    "Las actividades no realizadas valen cero."
+    "Sigue las instrucciones y la aplicación se encagará de "
+    "agrupar las calificaciones y generar un reporte "
+    "por grupo y alumno listo para descargar."
 )
 
 mes = st.text_input(
